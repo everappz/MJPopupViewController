@@ -9,7 +9,9 @@
 #import "UIViewController+MJPopupViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "MJPopupBackgroundView.h"
-#import "LFGlassView.h"
+#import "UIImage+ImageEffects.h"
+#import "UIImage+LSAdditions.h"
+#import "UIImageView+LSAdditions.h"
 #import <objc/runtime.h>
 
 #define kPopupModalAnimationDuration 0.35
@@ -140,14 +142,14 @@ static void * const keypath = (void*)&keypath;
     [dismissButton addTarget:self action:@selector(dismissPopupViewControllerWithanimation:) forControlEvents:UIControlEventTouchUpInside];
     
     // BackgroundView
-    LFGlassView *glassView = [[LFGlassView alloc] initWithFrame:sourceView.bounds];
-    glassView.liveBlurring = YES;
-    glassView.blurRadius = 3.0;
-    glassView.alpha = 0.0;
-    glassView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    glassView.backgroundColor = [UIColor clearColor];
-    [sourceView insertSubview:glassView belowSubview:overlayView];
-    self.mj_popupBackgroundView = glassView;
+    UIImageView *blurView = [UIImageView snapshotViewWithImage:nil sourceView:sourceView];
+    blurView.image = [blurView.image applyBlurWithRadius:20.0 tintColor:[UIColor clearColor] saturationDeltaFactor:1.8 maskImage:nil];
+    blurView.alpha = 0.0;
+    blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    blurView.backgroundColor = [UIColor clearColor];
+    [sourceView insertSubview:blurView belowSubview:overlayView];
+    self.mj_popupBackgroundView = blurView;
+    
     
     switch (animationType) {
         case MJPopupViewAnimationSlideBottomTop:
