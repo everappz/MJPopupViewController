@@ -11,8 +11,9 @@
 @class MJPopupBackgroundView;
 
 typedef enum {
-    MJPopupViewAnimationFade = 0,
-    MJPopupViewAnimationSlideBottomTop = 1,
+    MJPopupViewAnimationNone = 0,
+    MJPopupViewAnimationFade = 1,
+    MJPopupViewAnimationSlideBottomTop,
     MJPopupViewAnimationSlideBottomBottom,
     MJPopupViewAnimationSlideTopTop,
     MJPopupViewAnimationSlideTopBottom,

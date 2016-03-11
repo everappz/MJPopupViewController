@@ -83,8 +83,12 @@ static void * const keypath = (void*)&keypath;
             [self slideViewOut:popupView sourceView:sourceView overlayView:overlayView withAnimationType:animationType];
             break;
             
+        case MJPopupViewAnimationFade:
+            [self fadeViewOut:popupView sourceView:sourceView overlayView:overlayView animated:YES];
+            break;
+            
         default:
-            [self fadeViewOut:popupView sourceView:sourceView overlayView:overlayView];
+            [self fadeViewOut:popupView sourceView:sourceView overlayView:overlayView animated:NO];
             break;
     }
     
@@ -143,7 +147,13 @@ static void * const keypath = (void*)&keypath;
     
     // BackgroundView
     UIImageView *blurView = [UIImageView snapshotViewWithImage:nil sourceView:sourceView];
-    blurView.image = [blurView.image applyBlurWithRadius:20.0 tintColor:[UIColor clearColor] saturationDeltaFactor:1.8 maskImage:nil];
+    UIImage *sourceImage = blurView.image;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        UIImage *blurImage = [sourceImage applyBlurWithRadius:20.0 tintColor:[UIColor clearColor] saturationDeltaFactor:1.8 maskImage:nil];
+        dispatch_async(dispatch_get_main_queue(), ^{
+             blurView.image = blurImage;
+        });
+    });
     blurView.alpha = 0.0;
     blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     blurView.backgroundColor = [UIColor clearColor];
@@ -163,10 +173,17 @@ static void * const keypath = (void*)&keypath;
             dismissButton.tag = animationType;
             [self slideViewIn:popupView sourceView:sourceView overlayView:overlayView withAnimationType:animationType];
             break;
-        default:
+            
+        case MJPopupViewAnimationFade:
             dismissButton.tag = MJPopupViewAnimationFade;
-            [self fadeViewIn:popupView sourceView:sourceView overlayView:overlayView];
+            [self fadeViewIn:popupView sourceView:sourceView overlayView:overlayView animated:YES];
             break;
+            
+        default:
+            dismissButton.tag = MJPopupViewAnimationNone;
+            [self fadeViewIn:popupView sourceView:sourceView overlayView:overlayView animated:NO];
+            break;
+            
     }
     
     [self setDismissedCallback:dismissed];
@@ -325,7 +342,7 @@ static void * const keypath = (void*)&keypath;
 
 #pragma mark --- Fade
 
-- (void)fadeViewIn:(UIView*)popupView sourceView:(UIView*)sourceView overlayView:(UIView*)overlayView
+- (void)fadeViewIn:(UIView*)popupView sourceView:(UIView*)sourceView overlayView:(UIView*)overlayView animated:(BOOL)animated
 {
     // Generating Start and Stop Positions
     CGSize sourceSize = sourceView.bounds.size;
@@ -339,36 +356,57 @@ static void * const keypath = (void*)&keypath;
     popupView.frame = popupEndRect;
     popupView.alpha = 0.0f;
     
-    [UIView animateWithDuration:kPopupModalAnimationDuration animations:^{
+    void(^animations)(void) = ^{
         [self.mj_popupViewController viewWillAppear:NO];
         self.mj_popupBackgroundView.alpha = 1.0f;
         popupView.alpha = 1.0f;
-    } completion:^(BOOL finished) {
-        [self.mj_popupViewController viewDidAppear:NO];
-    }];
+    };
+    
+    void(^completion)(BOOL) = ^(BOOL finished){
+         [self.mj_popupViewController viewDidAppear:NO];
+    };
+    
+    if(animated){
+        [UIView animateWithDuration:kPopupModalAnimationDuration animations:animations completion:completion];
+    }
+    else{
+        animations();
+        completion(YES);
+    }
+    
 }
 
-- (void)fadeViewOut:(UIView*)popupView sourceView:(UIView*)sourceView overlayView:(UIView*)overlayView
+- (void)fadeViewOut:(UIView*)popupView sourceView:(UIView*)sourceView overlayView:(UIView*)overlayView animated:(BOOL)animated
 {
-    [UIView animateWithDuration:kPopupModalAnimationDuration animations:^{
+    
+    void(^animations)(void) = ^{
         [self.mj_popupViewController viewWillDisappear:NO];
         self.mj_popupBackgroundView.alpha = 0.0f;
         popupView.alpha = 0.0f;
-    } completion:^(BOOL finished) {
+    };
+    
+    void(^completion)(BOOL) = ^(BOOL finished){
         [popupView removeFromSuperview];
         [overlayView removeFromSuperview];
         [self.mj_popupViewController viewDidDisappear:NO];
         self.mj_popupViewController = nil;
         [self.mj_popupBackgroundView removeFromSuperview];
         self.mj_popupBackgroundView = nil;
-        
         id dismissed = [self dismissedCallback];
-        if (dismissed != nil)
-        {
+        if (dismissed != nil){
             ((void(^)(void))dismissed)();
             [self setDismissedCallback:nil];
         }
-    }];
+    };
+    
+    if(animated){
+        [UIView animateWithDuration:kPopupModalAnimationDuration animations:animations completion:completion];
+    }
+    else{
+        animations();
+        completion(YES);
+    }
+
 }
 
 #pragma mark -
