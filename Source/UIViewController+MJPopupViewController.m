@@ -146,20 +146,23 @@ static void * const keypath = (void*)&keypath;
     [dismissButton addTarget:self action:@selector(dismissPopupViewControllerWithanimation:) forControlEvents:UIControlEventTouchUpInside];
     
     // BackgroundView
-    UIImageView *blurView = [UIImageView snapshotViewWithImage:nil sourceView:sourceView];
-    UIImage *sourceImage = blurView.image;
+    /*
+    UIImageView *bgView = [UIImageView snapshotViewWithImage:nil sourceView:sourceView];
+    UIImage *sourceImage = bgView.image;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         UIImage *blurImage = [sourceImage applyBlurWithRadius:20.0 tintColor:[UIColor clearColor] saturationDeltaFactor:1.8 maskImage:nil];
         dispatch_async(dispatch_get_main_queue(), ^{
-             blurView.image = blurImage;
+             bgView.image = blurImage;
         });
     });
-    blurView.alpha = 0.0;
-    blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    blurView.backgroundColor = [UIColor clearColor];
-    [sourceView insertSubview:blurView belowSubview:overlayView];
-    self.mj_popupBackgroundView = blurView;
+     */
     
+    UIView *bgView = [[UIView alloc] initWithFrame:sourceView.bounds];
+    bgView.alpha = 0.0;
+    bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    bgView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
+    [sourceView insertSubview:bgView belowSubview:overlayView];
+    self.mj_popupBackgroundView = bgView;
     
     switch (animationType) {
         case MJPopupViewAnimationSlideBottomTop:
