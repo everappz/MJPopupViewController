@@ -12,6 +12,8 @@
 #import "UIImage+ImageEffects.h"
 #import "UIImage+LSAdditions.h"
 #import "UIImageView+LSAdditions.h"
+#import "UIView+LSAdditions.h"
+#import "LSTheme.h"
 #import <objc/runtime.h>
 
 #define kPopupModalAnimationDuration 0.35
@@ -155,13 +157,14 @@ static void * const keypath = (void*)&keypath;
              bgView.image = blurImage;
         });
     });
-     */
+    */
     
     UIView *bgView = [[UIView alloc] initWithFrame:sourceView.bounds];
     bgView.alpha = 0.0;
     bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     bgView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
     [sourceView insertSubview:bgView belowSubview:overlayView];
+    //[bgView applyBlurEffect:[[LSTheme currentTheme] blurEffectStyle]];
     self.mj_popupBackgroundView = bgView;
     
     switch (animationType) {
