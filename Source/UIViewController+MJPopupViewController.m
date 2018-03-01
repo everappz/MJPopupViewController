@@ -122,7 +122,7 @@ static void * const keypath = (void*)&keypath;
     popupView.layer.masksToBounds = NO;
     popupView.layer.shadowOffset = CGSizeMake(0, 0);
     popupView.layer.shadowRadius = 10.0;
-    popupView.layer.shadowOpacity = 0.4;
+    popupView.layer.shadowOpacity = 0.2;
     popupView.layer.shouldRasterize = YES;
     popupView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
     
@@ -162,7 +162,7 @@ static void * const keypath = (void*)&keypath;
     UIView *bgView = [[UIView alloc] initWithFrame:sourceView.bounds];
     bgView.alpha = 0.0;
     bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    bgView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
+    bgView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3];
     [sourceView insertSubview:bgView belowSubview:overlayView];
     //[bgView applyBlurEffect:[[LSTheme currentTheme] blurEffectStyle]];
     self.mj_popupBackgroundView = bgView;
