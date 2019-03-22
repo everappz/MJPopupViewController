@@ -136,6 +136,8 @@ static void * const keypath = (void*)&keypath;
     
     // Make the Background Clickable
     UIButton * dismissButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    dismissButton.accessibilityHint = NSLocalizedString(@"Double-tap to dismiss popup window.", @"all");
+    dismissButton.accessibilityLabel = NSLocalizedString(@"Dismiss popup", @"all");
     dismissButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     dismissButton.backgroundColor = [UIColor clearColor];
     dismissButton.frame = sourceView.bounds;
