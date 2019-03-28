@@ -9,11 +9,11 @@
 #import "UIViewController+MJPopupViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "MJPopupBackgroundView.h"
-#import "UIImage+ImageEffects.h"
-#import "UIImage+LSAdditions.h"
-#import "UIImageView+LSAdditions.h"
-#import "UIView+LSAdditions.h"
-#import "LSTheme.h"
+//#import "UIImage+ImageEffects.h"
+//#import "UIImage+LSAdditions.h"
+//#import "UIImageView+LSAdditions.h"
+//#import "UIView+LSAdditions.h"
+//#import "LSTheme.h"
 #import <objc/runtime.h>
 
 #define kPopupModalAnimationDuration 0.35
