@@ -67,7 +67,7 @@ static void * const keypath = (void*)&keypath;
     [self presentPopupViewController:popupViewController animationType:animationType dismissed:nil];
 }
 
-- (void)dismissPopupViewControllerWithanimationType:(MJPopupViewAnimation)animationType
+- (void)dismissPopupViewControllerWithAnimationType:(MJPopupViewAnimation)animationType
 {
     UIView *sourceView = [self topView];
     UIView *popupView = [sourceView viewWithTag:kMJPopupViewTag];
@@ -219,14 +219,14 @@ static void * const keypath = (void*)&keypath;
             case MJPopupViewAnimationSlideLeftRight:
             case MJPopupViewAnimationSlideRightLeft:
             case MJPopupViewAnimationSlideRightRight:
-                [self dismissPopupViewControllerWithanimationType:(MJPopupViewAnimation)dismissButton.tag];
+                [self dismissPopupViewControllerWithAnimationType:(MJPopupViewAnimation)dismissButton.tag];
                 break;
             default:
-                [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+                [self dismissPopupViewControllerWithAnimationType:MJPopupViewAnimationFade];
                 break;
         }
     } else {
-        [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+        [self dismissPopupViewControllerWithAnimationType:MJPopupViewAnimationFade];
     }
 }
 
