@@ -66,7 +66,7 @@ static void * const keypath = (void*)&keypath;
 }
 
 - (void)setMj_popupTheme:(MJPopupViewTheme *)mj_popupTheme{
-    objc_setAssociatedObject(self, kMJPopupTheme, kMJPopupTheme, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, kMJPopupTheme, mj_popupTheme, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)presentPopupViewController:(UIViewController*)popupViewController
