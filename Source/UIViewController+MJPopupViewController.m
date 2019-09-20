@@ -14,60 +14,23 @@
 
 #define kPopupModalAnimationDuration 0.25
 
-#define kMJPopupViewController @"kMJPopupViewController"
-#define kMJPopupBackgroundView @"kMJPopupBackgroundView"
-#define kMJPopupTheme @"kMJPopupTheme"
+static const void *kMJPopupViewController = &kMJPopupViewController;
+static const void *kMJPopupBackgroundView = &kMJPopupBackgroundView;
+static const void *kMJPopupTheme = &kMJPopupTheme;
+static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
 
 #define kMJSourceViewTag 11000
 #define kMJPopupViewTag 11001
 #define kMJOverlayViewTag 11002
 #define kMJShadowViewTag 11003
 
-@interface UIViewController (MJPopupViewControllerPrivate)
 
-@property (nonatomic, strong) UIView *mj_popupBackgroundView;
-
-@property (nonatomic, strong) MJPopupViewTheme *mj_popupTheme;
-
-- (UIView *)mj_topView;
-
-- (void)mj_presentPopupView:(UIView *)popupView;
-
-@end
-
-static NSString *MJPopupViewDismissedKey = @"MJPopupViewDismissed";
 
 ////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark Public
 
 @implementation UIViewController (MJPopupViewController)
-
-static void * const keypath = (void*)&keypath;
-
-- (UIViewController*)mj_popupViewController {
-    return objc_getAssociatedObject(self, kMJPopupViewController);
-}
-
-- (void)setMj_popupViewController:(UIViewController *)mj_popupViewController {
-    objc_setAssociatedObject(self, kMJPopupViewController, mj_popupViewController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (UIView*)mj_popupBackgroundView {
-    return objc_getAssociatedObject(self, kMJPopupBackgroundView);
-}
-
-- (void)setMj_popupBackgroundView:(UIView *)mj_popupBackgroundView {
-    objc_setAssociatedObject(self, kMJPopupBackgroundView, mj_popupBackgroundView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (MJPopupViewTheme *)mj_popupTheme{
-    return objc_getAssociatedObject(self, kMJPopupTheme);
-}
-
-- (void)setMj_popupTheme:(MJPopupViewTheme *)mj_popupTheme{
-    objc_setAssociatedObject(self, kMJPopupTheme, kMJPopupTheme, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
 
 - (void)presentPopupViewController:(UIViewController*)popupViewController
                              theme:(MJPopupViewTheme *)theme
@@ -522,11 +485,35 @@ static void * const keypath = (void*)&keypath;
 #pragma mark --- Dismissed
 
 - (void)setDismissedCallback:(void(^)(void))dismissed{
-    objc_setAssociatedObject(self, &MJPopupViewDismissedKey, dismissed, OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, MJPopupViewDismissedCallback, dismissed, OBJC_ASSOCIATION_RETAIN);
 }
 
 - (void(^)(void))dismissedCallback{
-    return objc_getAssociatedObject(self, &MJPopupViewDismissedKey);
+    return objc_getAssociatedObject(self, MJPopupViewDismissedCallback);
+}
+
+- (UIViewController *)mj_popupViewController {
+    return objc_getAssociatedObject(self, kMJPopupViewController);
+}
+
+- (void)setMj_popupViewController:(UIViewController *)mj_popupViewController {
+    objc_setAssociatedObject(self, kMJPopupViewController, mj_popupViewController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (UIView *)mj_popupBackgroundView {
+    return objc_getAssociatedObject(self, kMJPopupBackgroundView);
+}
+
+- (void)setMj_popupBackgroundView:(UIView *)mj_popupBackgroundView {
+    objc_setAssociatedObject(self, kMJPopupBackgroundView, mj_popupBackgroundView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (MJPopupViewTheme *)mj_popupTheme{
+    return objc_getAssociatedObject(self, kMJPopupTheme);
+}
+
+- (void)setMj_popupTheme:(MJPopupViewTheme *)mj_popupTheme{
+     objc_setAssociatedObject(self, kMJPopupTheme, mj_popupTheme, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
