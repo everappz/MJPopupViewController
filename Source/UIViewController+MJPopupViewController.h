@@ -25,8 +25,19 @@ typedef enum {
 
 @interface UIViewController (MJPopupViewController)
 
-@property (nonatomic, retain) UIViewController *mj_popupViewController;
-@property (nonatomic, retain) UIView *mj_popupBackgroundView;
+@property (nonatomic, strong) UIViewController *mj_popupViewController;
+@property (nonatomic, strong) UIView *mj_popupBackgroundView;
+@property (nonatomic, strong) NSShadow *mj_popupShadow;
+@property (nonatomic, strong) UIColor *mj_popupBackgroundColor;
+@property (nonatomic, strong) NSNumber *mj_popupCornerRadius;
+@property (nonatomic, strong) NSNumber *mj_popupModalAnimationDuration;
+
+- (void)presentPopupViewController:(UIViewController*)popupViewController
+                     animationType:(MJPopupViewAnimation)animationType;
+
+- (void)presentPopupViewController:(UIViewController*)popupViewController
+                     animationType:(MJPopupViewAnimation)animationType
+                         dismissed:(void(^)(void))dismissed;
 
 - (void)presentPopupViewController:(UIViewController*)popupViewController animationType:(MJPopupViewAnimation)animationType;
 - (void)presentPopupViewController:(UIViewController*)popupViewController animationType:(MJPopupViewAnimation)animationType dismissed:(void(^)(void))dismissed;
