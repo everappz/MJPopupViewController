@@ -12,6 +12,8 @@
 #import "MJPopupViewTheme.h"
 #import <objc/runtime.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 #define kPopupModalAnimationDuration 0.25
 
 static const void *kMJPopupViewController = &kMJPopupViewController;
@@ -32,28 +34,34 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
 
 @implementation UIViewController (MJPopupViewController)
 
-- (void)presentPopupViewController:(UIViewController*)popupViewController
-                             theme:(MJPopupViewTheme *)theme
-                     animationType:(MJPopupViewAnimation)animationType
-                         dismissed:(void(^)(void))dismissed{
+- (void)mj_presentPopupViewController:(UIViewController*)popupViewController
+                                theme:(MJPopupViewTheme *)theme
+                        animationType:(MJPopupViewAnimation)animationType
+                    presentCompletion:(nullable dispatch_block_t)presentCompletion
+                    dismissCompletion:(nullable dispatch_block_t)dismissCompletion
+{
     self.mj_popupViewController = popupViewController;
     [self mj_presentPopupView:popupViewController.view
                         theme:theme
                 animationType:animationType
-                    dismissed:dismissed];
+            presentCompletion:presentCompletion
+            dismissCompletion:dismissCompletion];
 }
 
-- (void)presentPopupViewController:(UIViewController*)popupViewController
-                             theme:(MJPopupViewTheme *)theme
-                     animationType:(MJPopupViewAnimation)animationType{
-    [self presentPopupViewController:popupViewController
-                               theme:theme
-                       animationType:animationType
-                           dismissed:nil];
+- (void)mj_presentPopupViewController:(UIViewController*)popupViewController
+                                theme:(MJPopupViewTheme *)theme
+                        animationType:(MJPopupViewAnimation)animationType
+{
+    [self mj_presentPopupViewController:popupViewController
+                                  theme:theme
+                          animationType:animationType
+                      presentCompletion:nil
+                      dismissCompletion:nil];
 }
 
-- (void)dismissPopupViewControllerWithAnimationType:(MJPopupViewAnimation)animationType{
-    
+- (void)mj_dismissPopupViewControllerWithAnimationType:(MJPopupViewAnimation)animationType
+                                            completion:(nullable dispatch_block_t)completion
+{
     UIView *sourceView = [self mj_topView];
     UIView *popupView = [sourceView viewWithTag:kMJPopupViewTag];
     UIView *overlayView = [sourceView viewWithTag:kMJOverlayViewTag];
@@ -67,29 +75,31 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
         case MJPopupViewAnimationSlideLeftRight:
         case MJPopupViewAnimationSlideRightLeft:
         case MJPopupViewAnimationSlideRightRight:
-            [self slideViewOut:popupView
-                    sourceView:sourceView
-                   overlayView:overlayView
-             withAnimationType:animationType];
+            [self mj_slideViewOut:popupView
+                       sourceView:sourceView
+                      overlayView:overlayView
+                withAnimationType:animationType
+                       completion:completion];
             break;
             
         case MJPopupViewAnimationFade:
-            [self fadeViewOut:popupView
-                   sourceView:sourceView
-                  overlayView:overlayView
-                     animated:YES];
+            [self mj_fadeViewOut:popupView
+                      sourceView:sourceView
+                     overlayView:overlayView
+                        animated:YES
+                      completion:completion];
             break;
             
         default:
-            [self fadeViewOut:popupView
-                   sourceView:sourceView
-                  overlayView:overlayView
-                     animated:NO];
+            [self mj_fadeViewOut:popupView
+                      sourceView:sourceView
+                     overlayView:overlayView
+                        animated:NO
+                      completion:completion];
             break;
     }
     
 }
-
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -98,23 +108,30 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
 
 - (void)mj_presentPopupView:(UIView*)popupView
                       theme:(MJPopupViewTheme *)theme
-              animationType:(MJPopupViewAnimation)animationType{
+              animationType:(MJPopupViewAnimation)animationType
+{
     [self mj_presentPopupView:popupView
                         theme:theme
                 animationType:animationType
-                    dismissed:nil];
+            presentCompletion:nil
+            dismissCompletion:nil];
 }
 
 - (void)mj_presentPopupView:(UIView *)popupView
                       theme:(MJPopupViewTheme *)theme
               animationType:(MJPopupViewAnimation)animationType
-                  dismissed:(void(^)(void))dismissed{
-    
+          presentCompletion:(nullable dispatch_block_t)presentCompletion
+          dismissCompletion:(nullable dispatch_block_t)dismissCompletion
+{
     self.mj_popupTheme = theme;
     
     UIView *sourceView = [self mj_topView];
     sourceView.tag = kMJSourceViewTag;
-    popupView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin |UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
+    popupView.autoresizingMask = 
+    UIViewAutoresizingFlexibleTopMargin |
+    UIViewAutoresizingFlexibleLeftMargin |
+    UIViewAutoresizingFlexibleBottomMargin |
+    UIViewAutoresizingFlexibleRightMargin;
     popupView.tag = kMJPopupViewTag;
     
     // check if source view controller is not in destination
@@ -165,7 +182,7 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
     [overlayView addSubview:popupView];
     [sourceView addSubview:overlayView];
     
-    [dismissButton addTarget:self action:@selector(dismissPopupViewControllerWithanimation:) forControlEvents:UIControlEventTouchUpInside];
+    [dismissButton addTarget:self action:@selector(mj_dismissPopupViewControllerWithAnimation:) forControlEvents:UIControlEventTouchUpInside];
     
     UIView *bgView = [[UIView alloc] initWithFrame:sourceView.bounds];
     bgView.alpha = 0.0;
@@ -185,34 +202,37 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
         case MJPopupViewAnimationSlideRightLeft:
         case MJPopupViewAnimationSlideRightRight:
             dismissButton.tag = animationType;
-            [self slideViewIn:popupView
-                   sourceView:sourceView
-                  overlayView:overlayView
-            withAnimationType:animationType];
+            [self mj_slideViewIn:popupView
+                      sourceView:sourceView
+                     overlayView:overlayView
+               withAnimationType:animationType
+                      completion:presentCompletion];
             break;
             
         case MJPopupViewAnimationFade:
             dismissButton.tag = MJPopupViewAnimationFade;
-            [self fadeViewIn:popupView
-                  sourceView:sourceView
-                 overlayView:overlayView
-                    animated:YES];
+            [self mj_fadeViewIn:popupView
+                     sourceView:sourceView
+                    overlayView:overlayView
+                       animated:YES
+                     completion:presentCompletion];
             break;
             
         default:
             dismissButton.tag = MJPopupViewAnimationNone;
-            [self fadeViewIn:popupView
-                  sourceView:sourceView
-                 overlayView:overlayView
-                    animated:NO];
+            [self mj_fadeViewIn:popupView
+                     sourceView:sourceView
+                    overlayView:overlayView
+                       animated:NO
+                     completion:presentCompletion];
             break;
             
     }
     
-    [self setDismissedCallback:dismissed];
+    self.mj_popupDismissedCallback = dismissCompletion;
 }
 
-- (UIView *)mj_topView {
+- (UIView *_Nullable)mj_topView {
     UIViewController *recentView = self;
     while (recentView.parentViewController != nil) {
         recentView = recentView.parentViewController;
@@ -220,7 +240,7 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
     return recentView.view;
 }
 
-- (void)dismissPopupViewControllerWithanimation:(id)sender{
+- (void)mj_dismissPopupViewControllerWithAnimation:(id)sender{
     if ([sender isKindOfClass:[UIButton class]]) {
         UIButton* dismissButton = sender;
         switch (dismissButton.tag) {
@@ -232,14 +252,14 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
             case MJPopupViewAnimationSlideLeftRight:
             case MJPopupViewAnimationSlideRightLeft:
             case MJPopupViewAnimationSlideRightRight:
-                [self dismissPopupViewControllerWithAnimationType:(MJPopupViewAnimation)dismissButton.tag];
+                [self mj_dismissPopupViewControllerWithAnimationType:(MJPopupViewAnimation)dismissButton.tag completion:nil];
                 break;
             default:
-                [self dismissPopupViewControllerWithAnimationType:MJPopupViewAnimationFade];
+                [self mj_dismissPopupViewControllerWithAnimationType:MJPopupViewAnimationFade completion:nil];
                 break;
         }
     } else {
-        [self dismissPopupViewControllerWithAnimationType:MJPopupViewAnimationFade];
+        [self mj_dismissPopupViewControllerWithAnimationType:MJPopupViewAnimationFade completion:nil];
     }
 }
 
@@ -249,10 +269,12 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
 
 #pragma mark --- Slide
 
-- (void)slideViewIn:(UIView*)popupView
-         sourceView:(UIView*)sourceView
-        overlayView:(UIView*)overlayView
-  withAnimationType:(MJPopupViewAnimation)animationType{
+- (void)mj_slideViewIn:(UIView*)popupView
+            sourceView:(UIView*)sourceView
+           overlayView:(UIView*)overlayView
+     withAnimationType:(MJPopupViewAnimation)animationType
+            completion:(nullable dispatch_block_t)animationCompletion
+{
     
     // Generating Start and Stop Positions
     CGSize sourceSize = sourceView.bounds.size;
@@ -311,20 +333,25 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
         shadowView.frame = popupView.frame;
     } completion:^(BOOL finished) {
         [self.mj_popupViewController viewDidAppear:NO];
+        if (animationCompletion) {
+            animationCompletion();
+        }
     }];
 }
 
 - (NSTimeInterval)mjPopUpViewAnimationDuration{
-    if(self.mj_popupTheme.mj_popupModalAnimationDuration>0){
+    if (self.mj_popupTheme.mj_popupModalAnimationDuration > 0) {
         return self.mj_popupTheme.mj_popupModalAnimationDuration;
     }
     return kPopupModalAnimationDuration;
 }
 
-- (void)slideViewOut:(UIView*)popupView
-          sourceView:(UIView*)sourceView
-         overlayView:(UIView*)overlayView
-   withAnimationType:(MJPopupViewAnimation)animationType{
+- (void)mj_slideViewOut:(UIView*)popupView
+             sourceView:(UIView*)sourceView
+            overlayView:(UIView*)overlayView
+      withAnimationType:(MJPopupViewAnimation)animationType
+             completion:(nullable dispatch_block_t)animationCompletion
+{
     
     // Generating Start and Stop Positions
     CGSize sourceSize = sourceView.bounds.size;
@@ -383,21 +410,26 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
         [self.mj_popupBackgroundView removeFromSuperview];
         self.mj_popupBackgroundView = nil;
         
-        id dismissed = [self dismissedCallback];
-        if (dismissed != nil){
-            ((void(^)(void))dismissed)();
-            [self setDismissedCallback:nil];
+        if (animationCompletion) {
+            animationCompletion();
         }
         
+        id dismissed = [self mj_popupDismissedCallback];
+        if (dismissed != nil){
+            ((void(^)(void))dismissed)();
+            self.mj_popupDismissedCallback = nil;
+        }
     }];
 }
 
 #pragma mark --- Fade
 
-- (void)fadeViewIn:(UIView*)popupView
-        sourceView:(UIView*)sourceView
-       overlayView:(UIView*)overlayView
-          animated:(BOOL)animated{
+- (void)mj_fadeViewIn:(UIView*)popupView
+           sourceView:(UIView*)sourceView
+          overlayView:(UIView*)overlayView
+             animated:(BOOL)animated
+           completion:(nullable dispatch_block_t)animationCompletion
+{
     
     // Generating Start and Stop Positions
     CGSize sourceSize = sourceView.bounds.size;
@@ -424,24 +456,29 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
     
     void(^completion)(BOOL) = ^(BOOL finished){
         [self.mj_popupViewController viewDidAppear:NO];
+        
+        if (animationCompletion) {
+            animationCompletion();
+        }
     };
     
-    if(animated){
+    if (animated) {
         [UIView animateWithDuration:self.mjPopUpViewAnimationDuration
                          animations:animations
                          completion:completion];
     }
-    else{
+    else {
         animations();
         completion(YES);
     }
-    
 }
 
-- (void)fadeViewOut:(UIView*)popupView
-         sourceView:(UIView*)sourceView
-        overlayView:(UIView*)overlayView
-           animated:(BOOL)animated{
+- (void)mj_fadeViewOut:(UIView*)popupView
+            sourceView:(UIView*)sourceView
+           overlayView:(UIView*)overlayView
+              animated:(BOOL)animated
+            completion:(nullable dispatch_block_t)animationCompletion
+{
     
     UIView *shadowView = [overlayView viewWithTag:kMJShadowViewTag];
     
@@ -456,23 +493,30 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
         [shadowView removeFromSuperview];
         [popupView removeFromSuperview];
         [overlayView removeFromSuperview];
+        
         [self.mj_popupViewController viewDidDisappear:NO];
         self.mj_popupViewController = nil;
+        
         [self.mj_popupBackgroundView removeFromSuperview];
         self.mj_popupBackgroundView = nil;
-        id dismissed = [self dismissedCallback];
+        
+        if (animationCompletion) {
+            animationCompletion();
+        }
+        
+        id dismissed = [self mj_popupDismissedCallback];
         if (dismissed != nil){
             ((void(^)(void))dismissed)();
-            [self setDismissedCallback:nil];
+            self.mj_popupDismissedCallback = nil;
         }
     };
     
-    if(animated){
+    if (animated) {
         [UIView animateWithDuration:self.mjPopUpViewAnimationDuration
                          animations:animations
                          completion:completion];
     }
-    else{
+    else {
         animations();
         completion(YES);
     }
@@ -484,36 +528,38 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
 
 #pragma mark --- Dismissed
 
-- (void)setDismissedCallback:(void(^)(void))dismissed{
-    objc_setAssociatedObject(self, MJPopupViewDismissedCallback, dismissed, OBJC_ASSOCIATION_RETAIN);
+- (void)setMj_popupDismissedCallback:(nullable dispatch_block_t)dismissed{
+    objc_setAssociatedObject(self, MJPopupViewDismissedCallback, dismissed, OBJC_ASSOCIATION_COPY);
 }
 
-- (void(^)(void))dismissedCallback{
+- (nullable dispatch_block_t)mj_popupDismissedCallback{
     return objc_getAssociatedObject(self, MJPopupViewDismissedCallback);
 }
 
-- (UIViewController *)mj_popupViewController {
+- (UIViewController *_Nullable)mj_popupViewController {
     return objc_getAssociatedObject(self, kMJPopupViewController);
 }
 
-- (void)setMj_popupViewController:(UIViewController *)mj_popupViewController {
+- (void)setMj_popupViewController:(UIViewController *_Nullable)mj_popupViewController {
     objc_setAssociatedObject(self, kMJPopupViewController, mj_popupViewController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (UIView *)mj_popupBackgroundView {
+- (UIView *_Nullable)mj_popupBackgroundView {
     return objc_getAssociatedObject(self, kMJPopupBackgroundView);
 }
 
-- (void)setMj_popupBackgroundView:(UIView *)mj_popupBackgroundView {
+- (void)setMj_popupBackgroundView:(UIView *_Nullable)mj_popupBackgroundView {
     objc_setAssociatedObject(self, kMJPopupBackgroundView, mj_popupBackgroundView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (MJPopupViewTheme *)mj_popupTheme{
+- (MJPopupViewTheme *_Nullable)mj_popupTheme{
     return objc_getAssociatedObject(self, kMJPopupTheme);
 }
 
-- (void)setMj_popupTheme:(MJPopupViewTheme *)mj_popupTheme{
-     objc_setAssociatedObject(self, kMJPopupTheme, mj_popupTheme, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+- (void)setMj_popupTheme:(MJPopupViewTheme *_Nullable)mj_popupTheme{
+    objc_setAssociatedObject(self, kMJPopupTheme, mj_popupTheme, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
+
+NS_ASSUME_NONNULL_END
