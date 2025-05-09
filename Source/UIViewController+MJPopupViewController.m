@@ -168,8 +168,8 @@ static const void *MJPopupViewDismissedCallback = &MJPopupViewDismissedCallback;
     
     // Make the Background Clickable
     UIButton * dismissButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    dismissButton.accessibilityHint = NSLocalizedString(@"Double-tap to dismiss popup window.", @"all");
-    dismissButton.accessibilityLabel = NSLocalizedString(@"Dismiss popup", @"all");
+    dismissButton.accessibilityHint = NSLocalizedString(@"Double-tap to dismiss popup window.", @"");
+    dismissButton.accessibilityLabel = NSLocalizedString(@"Dismiss popup", @"");
     dismissButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     dismissButton.backgroundColor = [UIColor clearColor];
     dismissButton.frame = sourceView.bounds;
